@@ -1,0 +1,20 @@
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker build -t lch9487/react-test -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run lch9487/react-test npm test -- --coverage
+#
+after_success:
+  - docker build -t lch9487/multi-client ./client
+  - docker build -t lch9487/multi-nginx ./nginx
+  - docker build -t lch9487/multi-server ./server
+  - docker build -t lch9487/multi-worker ./worker
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  - docker push lch9487/multi-client
+  - docker push lch9487/multi-nginx
+  - docker push lch9487/multi-server
+  - docker push lch9487/multi-worker
